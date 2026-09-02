@@ -55,3 +55,12 @@ python3 scripts/fetch_snapshot.py --from-fixture tests/fixtures/sample_raw.json
 ## E-7. REVIEW-1 지적 4건 수정 후 재검 (2026-09-02 14:35Z, 작성자 실행)
 - 수정: count_check 정수 정규화 · diff_snapshots None/빈문자열 동치 · app.js safeHref(http/https 만 링크) · tests/filter.test.mjs 커밋
 - `python3 -m unittest discover -s tests -p "test_*.py"` → Ran 37 tests OK (회귀 2건 추가) · `node --test tests/filter.test.mjs` → pass 26 · `node --check public/app.js` → rc=0 · `verify_no_key.sh` → OK
+
+## E-8. GitHub 배포 (2026-09-02 14:23~14:27Z, 작성자 실행)
+- `gh repo create kr80hwlee-bit/gov24-filter --public --source=. --push` → rc=0, origin/main = 16c3ec7
+- `gh api -X POST repos/kr80hwlee-bit/gov24-filter/pages -f build_type=workflow` → rc=0, html_url=https://kr80hwlee-bit.github.io/gov24-filter/
+- deploy-pages run 33641707853 → `completed success`(테스트 35/26·키 검사 OK 단계 포함)
+- `curl -sI https://kr80hwlee-bit.github.io/gov24-filter/` → HTTP/2 200 (AC-14)
+- `curl -s …/gov24-filter/app.js | grep -c odcloud` → 0 (AC-13 배포 URL 부분)
+- 브라우저(371px)에서 배포 URL 로드: 서울·개인 검색 `전체 30 · 일치 12 · 미확정 4 · 제외 14`, disclaimer 4, 콘솔 오류 0, 가로 스크롤 없음 → 로컬과 동일
+- 미완: Secret 미등록 상태라 refresh-snapshot 은 아직 실행하지 않음(사용자 T8 후)
