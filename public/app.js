@@ -70,6 +70,14 @@ function esc(s) {
     .replace(/"/g, "&quot;");
 }
 
+// 원문 링크는 http(s) 만 허용한다. javascript: 등 다른 스킴은 링크로 만들지 않는다 (REVIEW-1 #3).
+function safeHref(url) {
+  if (url == null) return null;
+  const s = String(url).trim();
+  if (!/^https?:\/\//i.test(s)) return null;
+  return esc(s);
+}
+
 function getServiceId(service) {
   return service && service["서비스ID"];
 }
@@ -448,11 +456,16 @@ function renderDetail() {
   const uncertainItems = result.items.filter((i) => i.status === "판정불가");
 
   const links = [];
-  if (service["상세조회URL"]) {
-    links.push(`<a href="${esc(service["상세조회URL"])}" target="_blank" rel="noopener">원문 상세조회</a>`);
+  const detailHref = safeHref(service["상세조회URL"]);
+  const applyHref = safeHref(service["온라인신청사이트URL"]);
+  if (detailHref) {
+    links.push(`<a href="${detailHref}" target="_blank" rel="noopener">원문 상세조회</a>`);
   }
-  if (service["온라인신청사이트URL"]) {
-    links.push(`<a href="${esc(service["온라인신청사이트URL"])}" target="_blank" rel="noopener">온라인 신청</a>`);
+  if (applyHref) {
+    links.push(`<a href="${applyHref}" target="_blank" rel="noopener">온라인 신청</a>`);
+  }
+  if (!detailHref && !applyHref) {
+    links.push(`<span class="muted">출처 링크 없음 — 제공 기관명으로 정부24(gov.kr)에서 검색</span>`);
   }
 
   const fetchedAt = state.snapshot ? state.snapshot.meta.fetched_at : null;

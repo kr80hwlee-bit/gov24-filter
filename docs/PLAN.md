@@ -14,9 +14,9 @@
 
 | 단계 | 내용 | 이번 세션 목표 | 구현 상태(계획서 v2 시점) |
 |---|---|---|---|
-| P1 MVP(영상 범위) | 수집 스크립트 · 스냅샷 · 조건 필터 정적 페이지 · 출처/기준일 표시 · 한계 안내 · GitHub Pages 배포 · 인증키 비노출 검증 | 구현 대상 | `[확인]` 로컬 구현·검증 완료(EVIDENCE E-4~E-6: 단위 35+25 통과, 키 검사 OK, 화면 AC-4~8·13·15 재현). **미완**: 실데이터 스냅샷(사용자 키 필요, T0) · GitHub 배포(T5b·T9, 진행 예정) |
-| P2 저장·비교 | 브라우저 로컬 저장 기반 관심 목록 · 비교 화면 · 구비서류 체크리스트 · 진행 상태 | 구현 대상 | `[확인]` 로컬 구현·검증 완료(E-6: AC-9~11 재현) |
-| P3 변경 감지(서버 없는 범위) | GitHub Actions 예약 수집 · 직전 스냅샷 대비 변경 목록(신규/변경/소멸) 페이지 · 수집 상태 페이지 | 구현 대상(서버 불필요 부분만) | `[확인]` diff 로직(단위 테스트)·변경/상태 페이지(E-6)·refresh.yml 작성 완료. **미완**: Actions 실제 2회 실행 후 변경 페이지 확인(AC-12, Secret 등록 후) |
+| P1 MVP(영상 범위) | 수집 스크립트 · 스냅샷 · 조건 필터 정적 페이지 · 출처/기준일 표시 · 한계 안내 · GitHub Pages 배포 · 인증키 비노출 검증 | 구현 대상 | `[확인]` 로컬 구현 완료. 검증 주체 구분: 작성자 실행 = E-5·E-6(단위 35+26, 키 검사, 화면 AC-4~8·13·15) / 채점자 독립 재현 = EVAL-2(단위·키 검사·AC-2) / 검수자 독립 재현 = §9.2 표(REVIEW-1). **미완**: 실데이터 스냅샷(사용자 키 필요, T0) · GitHub 배포(T5b·T9) |
+| P2 저장·비교 | 브라우저 로컬 저장 기반 관심 목록 · 비교 화면 · 구비서류 체크리스트 · 진행 상태 | 구현 대상 | `[확인]` 로컬 구현 완료. 작성자 실행 E-6(AC-9~11) / 검수자 독립 재현 §9.2 표 |
+| P3 변경 감지(서버 없는 범위) | GitHub Actions 예약 수집 · 직전 스냅샷 대비 변경 목록(신규/변경/소멸) 페이지 · 수집 상태 페이지 | 구현 대상(서버 불필요 부분만) | `[확인]` diff 로직(단위 테스트, 채점자 재현)·변경/상태 페이지(작성자 실행 E-6)·refresh.yml 작성 완료. **미완**: Actions 실제 2회 실행 후 변경 페이지 확인(AC-12, Secret 등록 후) |
 | P3 잔여 | 이메일/푸시 알림 · 계정 동기화 · 관리자 검수 화면 · 유사 중복 통합 | **이번 세션 범위 밖**, §8에 후속 조건 명시 |
 
 ### 1.2 범위 밖(긍정형 명시)
@@ -38,7 +38,7 @@
 | Base URL | `https://api.odcloud.kr/api/gov24/v3/` | `[확인]` Swagger https://infuser.odcloud.kr/api/stages/44436/api-docs · v1은 2026-09-02 실측 HTTP 404 `{"code":-3}` |
 | 오퍼레이션 | `serviceList` · `serviceDetail` · `supportConditions` | `[확인]` Swagger paths |
 | 인증 | 쿼리 `serviceKey=` 또는 헤더 `Authorization: Infuser <키>` | `[확인]` Swagger security(ApiKeyAuth header / ApiKeyAuth2 query) |
-| 파라미터 | `page` `perPage` `returnType` `cond[필드::연산자]` | `[확인]` Swagger · perPage=500 동작 `[확인]`(bid-collectors/sole-search 실사용) · 공식 최대치 `[데이터공백]` |
+| 파라미터 | `page` `perPage` `returnType` `cond[필드::연산자]` | `[확인]` Swagger · perPage=500 동작 `[확인]`(sole-search 실사용, 2026-07-20 10,979건 전량 수집 로그; bid-collectors는 perPage=100 사용) · 공식 최대치 `[데이터공백]` |
 | 응답 봉투 | `page, perPage, totalCount, currentCount, matchCount, data[]` | `[확인]` Swagger(oss 보고서 A-0) |
 | 오류 형식 | JSON `{"code": -4, "msg": "등록되지 않은 인증키 입니다."}` HTTP 401 / 키 누락 `-401` / 폐기 경로 `-3` HTTP 404 | `[확인]` 2026-09-02 실측(placeholder 키) |
 | serviceList 필드 21종 | 서비스ID 지원유형 서비스명 서비스목적요약 지원대상 선정기준 지원내용 신청방법 신청기한 상세조회URL 소관기관코드 소관기관명 부서명 조회수 소관기관유형 사용자구분 서비스분야 접수기관 전화문의 등록일시 수정일시 | `[확인]` Swagger serviceList_model |
@@ -194,7 +194,7 @@ Manyfast ID → 이 계획의 작업 단위. "제외"는 §1.1 P3 잔여.
 | T3 | 화면 P1 | `python3 -m http.server 8080 -d public` 후 브라우저 확인 | T2 |
 | T4 | 화면 P2(저장·비교·서류·상태) | 같은 서버 | T3 |
 | T5a | 워크플로 파일 작성 | `.github/workflows/deploy.yml`(push→테스트→키검사→Pages), `.github/workflows/refresh.yml`(매일 21:00 UTC→수집→검사→커밋→Pages). 검증: `python3 -c "import yaml;[yaml.safe_load(open(f)) for f in ['.github/workflows/deploy.yml','.github/workflows/refresh.yml']]"` | 없음(작성 완료 `[확인]` EVIDENCE §E-2) |
-| T5b | 저장소 생성 · Pages 활성화 | `git init -b main && git add -A && git commit -m init && gh repo create kr80hwlee-bit/gov24-filter --public --source=. --push` → `gh api -X POST repos/kr80hwlee-bit/gov24-filter/pages -f build_type=workflow` | T5a, T7 |
+| T5b | 저장소 생성 · Pages 활성화 | 먼저 `gh repo view kr80hwlee-bit/gov24-filter` 로 존재 여부 확인. 없으면 `git init -b main && git add -A && git commit -m init && gh repo create kr80hwlee-bit/gov24-filter --public --source=. --push`, 이미 있으면 remote 추가 후 main 업로드만. Pages는 `gh api -X POST repos/kr80hwlee-bit/gov24-filter/pages -f build_type=workflow`(이미 켜져 있으면 422 "already exists"를 정상으로 본다). 두 명령 모두 재실행해도 안전하다 `[결정]` | T5a, T7 |
 | T6 | 변경 페이지·상태 페이지(P3) | 브라우저 확인 | T1 diff |
 | T7 | 키 부재 검사 | `bash scripts/verify_no_key.sh` | T1 산출물 |
 | T8 | 사용자 단계: Secret 등록 | 사용자가 실행: `gh secret set DATA_GO_KR_SERVICE_KEY --repo kr80hwlee-bit/gov24-filter` (프롬프트에 붙여넣기) | T5 |
@@ -262,6 +262,25 @@ Manyfast ID → 이 계획의 작업 단위. "제외"는 §1.1 P3 잔여.
 
 ### 9.2 검수 분리
 - 작성자(cla)와 채점자(별도 rubric-evaluator 에이전트, sonnet)를 분리한다. 코드 완성 후 별도 reviewer 에이전트가 AC 표를 재현한다. 작성자 자기 판정으로 종결하지 않는다.
+- 독립 재현 현황 `[확인]` (채점자 = EVAL-2 · 검수자 = REVIEW-1, 둘 다 작성자와 다른 인스턴스):
+
+| AC | 작성자 실행 | 채점자 독립 재현(EVAL-2) | 검수자 독립 재현(REVIEW-1) | 비고 |
+|---|---|---|---|---|
+| AC-1 | 픽스처 모드만(E-5) | — | — | 실데이터는 사용자 키 필요(T0) |
+| AC-2 | E-4 | 재현 PASS | 재현 PASS | |
+| AC-3 | E-5 | unittest 35 PASS | unittest PASS + 문자열 totalCount 결함 적발(N) → 수정·회귀 테스트 추가(E-7) |
+| AC-4 | E-6 | — | 브라우저 없음, 미검증 | 작성자 브라우저 실행만 |
+| AC-5a/b/c | E-6 | node --test PASS | node import 로 경계값 7종 PASS | |
+| AC-6 | E-6 | node --test PASS(합 불변식) | 불변식 우회 시도 실패(=통과) | |
+| AC-7 | E-6 | — | 정적 검사: href 스킴 미검증 결함 적발(N) → safeHref 추가(E-7) | 렌더링은 작성자만 |
+| AC-8 | E-6 | — | 정적 HTML: disclaimer 4개·닫기 버튼 없음 확인 | |
+| AC-9~11 | E-6 | — | 브라우저 없음, 미검증 | localStorage 상호작용 |
+| AC-12 | diff 단위 테스트(E-5) | unittest PASS | None↔"" 오탐 적발(N) → 수정·회귀 테스트(E-7) | Actions 실행은 Secret 등록 후 |
+| AC-13 | E-5 | verify_no_key OK | 가짜 키 주입 → FAIL 검출 확인 후 원상복구 | |
+| AC-14 | — | — | — | 배포 후(T9) |
+| AC-15 | E-6(371px) | — | 브라우저 없음, 미검증 | |
+
+- 미검증으로 남은 AC-4·9·10·11·15는 작성자 브라우저 실행 증거(E-6)만 있다. Director 또는 브라우저가 있는 검수 세션이 재현하기 전까지 "작성자 단독 확인"으로 표기한다 `[결정]`.
 
 ### 9.3 키 부재 검사(verify_no_key.sh)
 1. `.env`에서 키를 읽어 `public/` 전 파일에 원문·URL인코딩 형태가 0건인지 `grep -rF`로 검사한다(키는 출력하지 않는다).

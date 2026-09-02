@@ -129,10 +129,15 @@ def check_fields(first_record, required=None):
 
 def count_check(total_count, received, unique_ids):
     """PLAN §5.2. 수신==totalCount 이고 고유==수신 이면 PASS, 아니면 FAIL."""
-    status = "PASS" if (received == total_count and unique_ids == received) else "FAIL"
+    # API 가 totalCount 를 문자열로 줄 수도 있으므로 정수로 정규화한다 (REVIEW-1 #1).
+    try:
+        total_int = int(str(total_count).strip())
+    except (TypeError, ValueError):
+        total_int = None
+    status = "PASS" if (total_int is not None and received == total_int and unique_ids == received) else "FAIL"
     return {
         "status": status,
-        "totalCount": total_count,
+        "totalCount": total_int if total_int is not None else total_count,
         "received": received,
         "unique_ids": unique_ids,
     }
@@ -266,6 +271,11 @@ def diff_snapshots(prev, new, watch_fields=None):
         for f in watch_fields:
             before = old_rec.get(f)
             after = new_rec.get(f)
+            # None·빈 문자열·공백만 있는 값은 같은 것으로 본다 (REVIEW-1 #2, 노이즈 방지).
+            norm_before = before.strip() if isinstance(before, str) else before
+            norm_after = after.strip() if isinstance(after, str) else after
+            if (norm_before or None) == (norm_after or None):
+                continue
             if before != after:
                 field_changes.append({"field": f, "before": before, "after": after})
         if field_changes:

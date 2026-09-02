@@ -215,3 +215,22 @@ class TestBuildCond(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestReview1Regressions(unittest.TestCase):
+    """REVIEW-1 (docs/REVIEW-1.md) 에서 적발된 N등급 결함의 회귀 테스트."""
+
+    def test_count_check_accepts_string_total(self):
+        self.assertEqual(fs.count_check("30", 30, 30)["status"], "PASS")
+        self.assertEqual(fs.count_check(" 30 ", 30, 30)["status"], "PASS")
+        self.assertEqual(fs.count_check("abc", 30, 30)["status"], "FAIL")
+        self.assertEqual(fs.count_check(None, 30, 30)["status"], "FAIL")
+
+    def test_diff_ignores_none_vs_empty(self):
+        prev = {"services": [{"서비스ID": "A", "서비스명": "x", "신청기한": None}]}
+        new = {"services": [{"서비스ID": "A", "서비스명": "x", "신청기한": ""}]}
+        self.assertEqual(fs.diff_snapshots(prev, new)["changed"], [])
+        new2 = {"services": [{"서비스ID": "A", "서비스명": "x", "신청기한": "  "}]}
+        self.assertEqual(fs.diff_snapshots(prev, new2)["changed"], [])
+        new3 = {"services": [{"서비스ID": "A", "서비스명": "x", "신청기한": "2026-12-31"}]}
+        self.assertEqual(len(fs.diff_snapshots(prev, new3)["changed"]), 1)

@@ -51,3 +51,7 @@ python3 scripts/fetch_snapshot.py --from-fixture tests/fixtures/sample_raw.json
 - 비교 2건 → 비교 표 렌더링 (AC-10) · 변경 사항 탭: 신규/변경/소멸 0건 표시 (AC-12 표시부) · 데이터 상태 탭: count_check PASS·지역 미확정 13.3%
 - `document.documentElement.scrollWidth`=356 ≤ innerWidth 371 (AC-15)
 - 수정한 결함: ① 지난 마감일에 `D-1이하` 배지 → `마감 지남`으로 분기(filter.js) ② `#business-group[hidden]`이 CSS에 눌려 보임 → `[hidden]{display:none!important}` 추가(styles.css) ③ `node --test tests/`가 Node 22에서 디렉터리를 모듈로 해석해 실패 → 워크플로·계획을 `tests/filter.test.mjs` 명시로 수정
+
+## E-7. REVIEW-1 지적 4건 수정 후 재검 (2026-09-02 14:35Z, 작성자 실행)
+- 수정: count_check 정수 정규화 · diff_snapshots None/빈문자열 동치 · app.js safeHref(http/https 만 링크) · tests/filter.test.mjs 커밋
+- `python3 -m unittest discover -s tests -p "test_*.py"` → Ran 37 tests OK (회귀 2건 추가) · `node --test tests/filter.test.mjs` → pass 26 · `node --check public/app.js` → rc=0 · `verify_no_key.sh` → OK

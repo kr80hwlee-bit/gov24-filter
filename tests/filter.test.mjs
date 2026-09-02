@@ -209,4 +209,10 @@ describe("classifyDeadlineUrgency", () => {
     const svc = makeService({ deadline_kind: "상시" });
     assert.equal(classifyDeadlineUrgency(svc, new Date()), null);
   });
+
+  test("이미 지난 기간형 마감은 마감 지남", () => {
+    const today = new Date("2026-09-02T00:00:00+09:00");
+    const svc = makeService({ deadline_kind: "기간", deadline_date: "2026-08-01" });
+    assert.equal(classifyDeadlineUrgency(svc, today), "마감 지남");
+  });
 });
