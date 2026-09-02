@@ -64,3 +64,6 @@ python3 scripts/fetch_snapshot.py --from-fixture tests/fixtures/sample_raw.json
 - `curl -s …/gov24-filter/app.js | grep -c odcloud` → 0 (AC-13 배포 URL 부분)
 - 브라우저(371px)에서 배포 URL 로드: 서울·개인 검색 `전체 30 · 일치 12 · 미확정 4 · 제외 14`, disclaimer 4, 콘솔 오류 0, 가로 스크롤 없음 → 로컬과 동일
 - 미완: Secret 미등록 상태라 refresh-snapshot 은 아직 실행하지 않음(사용자 T8 후)
+
+## E-9. AC-15 정확히 375px 재측정 (2026-09-02 14:45Z, 배포 URL, 브라우저 모바일 프리셋 375×812·Android UA)
+- 검색 실행 후 비교 탭까지 이동한 상태에서 `document.documentElement.scrollWidth`=375, `document.body.scrollWidth`=375, `innerWidth`=375 → 가로 스크롤 없음(AC-15 PASS). EVAL-3 지적(371px 실측)에 대한 재측정.
