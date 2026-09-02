@@ -1,0 +1,12 @@
+# 인증키는 절대 커밋하지 않는다
+.env
+.env.*
+!.env.example
+node_modules/
+.DS_Store
+data/raw_pages/
+__pycache__/
+*.pyc
+data/.calls_*
+data/snapshot.prev.json
+public/data/_dev_sample.json

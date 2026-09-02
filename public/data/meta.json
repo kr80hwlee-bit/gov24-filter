@@ -1,0 +1,16 @@
+{
+  "fetched_at": "2026-09-02T14:11:27Z",
+  "source": "data.go.kr 15113968 / api.odcloud.kr gov24 v3",
+  "total_count": 30,
+  "received": 30,
+  "unique_ids": 30,
+  "count_check": "PASS",
+  "region_unresolved_ratio": 0.1333,
+  "calls_used": 0,
+  "sample": true,
+  "field_check": {
+    "ok": true,
+    "missing": []
+  },
+  "warnings": []
+}

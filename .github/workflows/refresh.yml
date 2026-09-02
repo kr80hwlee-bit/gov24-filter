@@ -1,0 +1,64 @@
+name: refresh-snapshot
+
+on:
+  schedule:
+    - cron: "0 21 * * *"   # UTC 21:00 = KST 06:00 매일
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 스냅샷 수집 (키는 Secret 에서만)
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: |
+          if [ -z "$DATA_GO_KR_SERVICE_KEY" ]; then
+            echo "::error::Secret DATA_GO_KR_SERVICE_KEY 가 비어 있다. gh secret set 으로 등록할 것."
+            exit 1
+          fi
+          python3 scripts/fetch_snapshot.py
+      - name: 배포물 인증키 부재 검사
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: bash scripts/verify_no_key.sh
+      - name: 테스트
+        run: |
+          node --test tests/filter.test.mjs
+          python3 -m unittest discover -s tests -p "test_*.py"
+      - name: 산출물 커밋
+        run: |
+          git config user.name "gov24-filter-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add public/data/snapshot.json public/data/meta.json public/data/changes.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "data: snapshot $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - id: deployment
+        uses: actions/deploy-pages@v4

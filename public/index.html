@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>보조금24 조건 필터</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>보조금24 조건 필터</h1>
+    <p class="app-subtitle">내 조건에서 걸러지지 않은 정부·지자체 지원사업을 찾아봅니다.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="주요 화면">
+    <button type="button" class="tab-btn is-active" data-tab="search" role="tab" aria-selected="true">검색</button>
+    <button type="button" class="tab-btn" data-tab="saved" role="tab" aria-selected="false">관심</button>
+    <button type="button" class="tab-btn" data-tab="compare" role="tab" aria-selected="false">비교</button>
+    <button type="button" class="tab-btn" data-tab="changes" role="tab" aria-selected="false">변경 사항</button>
+    <button type="button" class="tab-btn" data-tab="status" role="tab" aria-selected="false">데이터 상태</button>
+  </nav>
+
+  <div id="load-error" class="banner banner-error" hidden></div>
+  <div id="sample-banner" class="banner banner-warn" hidden></div>
+  <div id="stale-banner" class="banner banner-warn" hidden></div>
+
+  <main id="app-main">
+    <!-- 검색 -->
+    <section id="tab-search" class="tab-panel" aria-labelledby="검색">
+      <form id="criteria-form" class="criteria-form">
+        <div class="field-group">
+          <label for="f-region">지역</label>
+          <select id="f-region" name="region">
+            <option value="전체">전체</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">신청자 유형</span>
+          <div class="radio-row" id="f-userType">
+            <label><input type="radio" name="userType" value="개인" checked /> 개인</label>
+            <label><input type="radio" name="userType" value="소상공인" /> 소상공인</label>
+            <label><input type="radio" name="userType" value="법인/시설/단체" /> 법인·시설·단체</label>
+          </div>
+        </div>
+
+        <div class="field-group" id="business-group" hidden>
+          <label for="f-business">사업자 상태</label>
+          <select id="f-business" name="business">
+            <option value="">무관</option>
+            <option value="JA1101">예비창업자</option>
+            <option value="JA1102">영업중</option>
+            <option value="JA1103">생계곤란/폐업예정</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label for="f-age">나이</label>
+          <input type="number" id="f-age" name="age" min="0" max="120" placeholder="예: 25" />
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">성별</span>
+          <div class="radio-row" id="f-gender">
+            <label><input type="radio" name="gender" value="" checked /> 무관</label>
+            <label><input type="radio" name="gender" value="남성" /> 남</label>
+            <label><input type="radio" name="gender" value="여성" /> 여</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="f-income">소득 구간(중위소득)</label>
+          <select id="f-income" name="income">
+            <option value="">무관</option>
+            <option value="0-50">50% 이하</option>
+            <option value="51-75">51~75%</option>
+            <option value="76-100">76~100%</option>
+            <option value="101-200">101~200%</option>
+            <option value="200+">200% 초과</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <span class="field-label">가구 특성</span>
+          <div class="checkbox-row" id="f-household">
+            <label><input type="checkbox" name="household" value="다문화가족" /> 다문화가족</label>
+            <label><input type="checkbox" name="household" value="북한이탈주민" /> 북한이탈주민</label>
+            <label><input type="checkbox" name="household" value="한부모" /> 한부모</label>
+            <label><input type="checkbox" name="household" value="1인가구" /> 1인가구</label>
+            <label><input type="checkbox" name="household" value="다자녀" /> 다자녀</label>
+            <label><input type="checkbox" name="household" value="무주택" /> 무주택</label>
+            <label><input type="checkbox" name="household" value="신규전입" /> 신규전입</label>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="f-fields">서비스분야</label>
+          <select id="f-fields" name="fields" multiple size="6"></select>
+          <p class="field-hint">Ctrl/Cmd 클릭으로 여러 개를 고를 수 있습니다.</p>
+        </div>
+
+        <div class="field-group">
+          <label for="f-keyword">키워드</label>
+          <input type="text" id="f-keyword" name="keyword" placeholder="사업명·요약·지원대상에서 검색" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="btn-search" class="btn btn-primary">검색</button>
+          <button type="button" id="btn-reset" class="btn btn-secondary">초기화</button>
+        </div>
+      </form>
+
+      <div id="search-results">
+        <div class="disclaimer" id="disclaimer-results">
+          이 목록은 조건에서 걸러지지 않은 사업이며 실제 지급 여부는 담당 기관이 판단합니다.
+          데이터 기준일: <span class="js-fetched-date">불러오는 중</span>
+        </div>
+
+        <div class="summary-line" id="summary-line" hidden>
+          <span id="summary-text"></span>
+          <label class="sort-label">
+            정렬
+            <select id="sort-select">
+              <option value="default">기본(마감→일치수→지역)</option>
+              <option value="deadline">마감임박순</option>
+              <option value="matchCount">일치 항목 많은 순</option>
+              <option value="region">지역 우선</option>
+              <option value="views">조회수순</option>
+            </select>
+          </label>
+        </div>
+
+        <div id="compare-notice" class="banner banner-warn" hidden>비교는 최대 4개까지 선택할 수 있습니다.</div>
+
+        <section class="result-group" id="group-matched">
+          <h2>일치 <span class="count" id="count-matched">0</span>건</h2>
+          <ul class="card-list" id="list-matched"></ul>
+          <button type="button" class="btn btn-more" data-group="matched" hidden>더보기</button>
+        </section>
+
+        <details class="result-group" id="group-unknown" open>
+          <summary><h2 class="inline-h2">미확정 <span class="count" id="count-unknown">0</span>건</h2></summary>
+          <ul class="card-list" id="list-unknown"></ul>
+          <button type="button" class="btn btn-more" data-group="unknown" hidden>더보기</button>
+        </details>
+
+        <details class="result-group" id="group-excluded">
+          <summary><h2 class="inline-h2">제외 <span class="count" id="count-excluded">0</span>건</h2></summary>
+          <ul class="card-list" id="list-excluded"></ul>
+          <button type="button" class="btn btn-more" data-group="excluded" hidden>더보기</button>
+        </details>
+      </div>
+    </section>
+
+    <!-- 상세 -->
+    <section id="detail-panel" class="detail-panel" hidden>
+      <button type="button" id="detail-close" class="btn btn-secondary">닫기</button>
+      <div class="disclaimer" id="disclaimer-detail-top">
+        이 목록은 조건에서 걸러지지 않은 사업이며 실제 지급 여부는 담당 기관이 판단합니다.
+        데이터 기준일: <span class="js-fetched-date">불러오는 중</span>
+      </div>
+      <div id="detail-body"></div>
+      <div class="disclaimer" id="disclaimer-detail-bottom">
+        이 목록은 조건에서 걸러지지 않은 사업이며 실제 지급 여부는 담당 기관이 판단합니다.
+        데이터 기준일: <span class="js-fetched-date">불러오는 중</span>
+      </div>
+    </section>
+
+    <!-- 관심 -->
+    <section id="tab-saved" class="tab-panel" hidden>
+      <h2>관심 목록</h2>
+      <div id="saved-body"></div>
+    </section>
+
+    <!-- 비교 -->
+    <section id="tab-compare" class="tab-panel" hidden>
+      <h2>비교</h2>
+      <div class="disclaimer" id="disclaimer-compare">
+        이 목록은 조건에서 걸러지지 않은 사업이며 실제 지급 여부는 담당 기관이 판단합니다.
+        데이터 기준일: <span class="js-fetched-date">불러오는 중</span>
+      </div>
+      <div id="compare-body"></div>
+    </section>
+
+    <!-- 변경 사항 -->
+    <section id="tab-changes" class="tab-panel" hidden>
+      <h2>변경 사항</h2>
+      <div id="changes-body"></div>
+      <h3>마감 임박</h3>
+      <div id="urgent-body"></div>
+    </section>
+
+    <!-- 데이터 상태 -->
+    <section id="tab-status" class="tab-panel" hidden>
+      <h2>데이터 상태</h2>
+      <div id="status-body"></div>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
