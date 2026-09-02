@@ -2,7 +2,10 @@
 // Node 22의 모듈 구문 자동 감지로 동작함을 이 세션에서 실측 확인했다).
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { evaluate, summarize, sortServices, classifyDeadlineUrgency } from "../public/filter.js";
+import { safeHref } from "../public/app.js";
+import { REGIONS } from "../public/regions.js";
 
 function makeService(overrides) {
   return Object.assign(
@@ -73,6 +76,17 @@ describe("evaluate - 사용자구분 (§5.1)", () => {
 });
 
 describe("evaluate - 지역 (§5.3)", () => {
+  test("배포 스냅샷의 지역 값은 UI 정본명 계약을 따른다", () => {
+    const snapshot = JSON.parse(
+      readFileSync(new URL("../public/data/snapshot.json", import.meta.url), "utf8")
+    );
+    const allowed = new Set(["전국", ...REGIONS]);
+    const invalid = snapshot.services
+      .map((service) => service.region)
+      .filter((region) => region != null && !allowed.has(region));
+    assert.deepEqual(invalid, []);
+  });
+
   test("전국 사업은 어떤 지역을 선택해도 일치", () => {
     const svc = makeService({ region: "전국" });
     const r = evaluate(svc, { region: "서울특별시" });
@@ -214,5 +228,14 @@ describe("classifyDeadlineUrgency", () => {
     const today = new Date("2026-09-02T00:00:00+09:00");
     const svc = makeService({ deadline_kind: "기간", deadline_date: "2026-08-01" });
     assert.equal(classifyDeadlineUrgency(svc, today), "마감 지남");
+  });
+});
+
+describe("safeHref - 원문 링크 스킴", () => {
+  test("http와 https 링크만 허용한다", () => {
+    assert.equal(safeHref("https://example.com/a?x=1&y=2"), "https://example.com/a?x=1&amp;y=2");
+    assert.equal(safeHref("http://example.com"), "http://example.com");
+    assert.equal(safeHref("javascript:alert(1)"), null);
+    assert.equal(safeHref("data:text/html,x"), null);
   });
 });

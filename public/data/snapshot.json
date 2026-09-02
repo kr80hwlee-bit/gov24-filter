@@ -317,7 +317,7 @@
       "user_types": [
         "개인"
       ],
-      "region": "경기",
+      "region": "경기도",
       "deadline_kind": "상시"
     },
     {
@@ -379,7 +379,7 @@
       "user_types": [
         "개인"
       ],
-      "region": "서울",
+      "region": "서울특별시",
       "deadline_kind": "기간",
       "deadline_date": "2025-06-11"
     },
@@ -432,7 +432,7 @@
       "user_types": [
         "개인"
       ],
-      "region": "인천",
+      "region": "인천광역시",
       "deadline_kind": "상시"
     },
     {
@@ -496,7 +496,7 @@
       "user_types": [
         "가구"
       ],
-      "region": "세종",
+      "region": "세종특별자치시",
       "deadline_kind": "불명"
     },
     {
@@ -547,7 +547,7 @@
       "user_types": [
         "개인"
       ],
-      "region": "제주",
+      "region": "제주특별자치도",
       "deadline_kind": "기간",
       "deadline_date": "2026-03-31"
     },
@@ -603,7 +603,7 @@
       "user_types": [
         "개인"
       ],
-      "region": "경기",
+      "region": "경기도",
       "deadline_kind": "기간",
       "deadline_date": "2026-06-30"
     },
@@ -668,7 +668,7 @@
       "user_types": [
         "가구"
       ],
-      "region": "경기",
+      "region": "경기도",
       "deadline_kind": "불명"
     },
     {
@@ -732,7 +732,7 @@
       "user_types": [
         "개인"
       ],
-      "region": "전북",
+      "region": "전북특별자치도",
       "deadline_kind": "불명"
     },
     {
@@ -1050,7 +1050,7 @@
         "개인",
         "가구"
       ],
-      "region": "인천",
+      "region": "인천광역시",
       "deadline_kind": "상시"
     },
     {
@@ -1219,7 +1219,7 @@
         "개인",
         "소상공인"
       ],
-      "region": "경기",
+      "region": "경기도",
       "deadline_kind": "상시"
     },
     {
@@ -1286,7 +1286,7 @@
         "가구",
         "법인/시설/단체"
       ],
-      "region": "경기",
+      "region": "경기도",
       "deadline_kind": "상시"
     },
     {

@@ -37,10 +37,10 @@ class TestResolveRegion(unittest.TestCase):
         self.assertEqual(fs.resolve_region("공공기관", "한국전력공사"), "전국")
 
     def test_sido_matched_by_full_name(self):
-        self.assertEqual(fs.resolve_region("광역시도", "경상남도"), "경남")
+        self.assertEqual(fs.resolve_region("광역시도", "경상남도"), "경상남도")
 
     def test_sigungu_matched_by_prefix(self):
-        self.assertEqual(fs.resolve_region("시군구", "경기도 용인시"), "경기")
+        self.assertEqual(fs.resolve_region("시군구", "경기도 용인시"), "경기도")
 
     def test_unmappable_org_name_is_none(self):
         self.assertIsNone(fs.resolve_region("지방출자_출연기관", "재단법인동대문문화재단"))

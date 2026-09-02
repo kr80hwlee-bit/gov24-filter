@@ -71,7 +71,7 @@ function esc(s) {
 }
 
 // 원문 링크는 http(s) 만 허용한다. javascript: 등 다른 스킴은 링크로 만들지 않는다 (REVIEW-1 #3).
-function safeHref(url) {
+export function safeHref(url) {
   if (url == null) return null;
   const s = String(url).trim();
   if (!/^https?:\/\//i.test(s)) return null;
@@ -499,8 +499,8 @@ function renderDetail() {
               .map(
                 (i) =>
                   `<li><span class="${badgeClass(i.status)}">${esc(i.status)}</span> ${esc(i.label)} — ${esc(i.evidence)}` +
-                  (service["상세조회URL"]
-                    ? ` <a href="${esc(service["상세조회URL"])}" target="_blank" rel="noopener">원문에서 확인</a>`
+                  (detailHref
+                    ? ` <a href="${detailHref}" target="_blank" rel="noopener">원문에서 확인</a>`
                     : "") +
                   `</li>`
               )
@@ -877,4 +877,6 @@ async function init() {
   }
 }
 
-init();
+if (typeof document !== "undefined") {
+  init();
+}
